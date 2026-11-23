@@ -13,4 +13,6 @@ dependencies = [
     "pypdfium2>=5.15.2",    # transforme une page PDF en image (pour l'OCR)
     "pillow>=13.0.0",       # enregistre l'image en PNG
     "requests>=2.32",       # appels HTTP à l'API du modèle d'OCR
+    "pandas>=3.1.1",        # tableaux de données (DataFrame)
+    "pyarrow>=26.0.1",      # lecture / écriture des fichiers Parquet
 ]

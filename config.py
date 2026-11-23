@@ -21,6 +21,7 @@ BUCKET = os.getenv("S3_BUCKET", "factures")
 
 # --- Dossiers de données ---
 DOSSIER_LANDING = DOSSIER_PROJET / "data" / "landing"   # PDF téléchargés depuis S3
+DOSSIER_BRONZE = DOSSIER_PROJET / "data" / "bronze"     # texte brut extrait + métadonnées (Parquet)
 
 # --- OCR ---
 OCR_URL = os.getenv("OCR_BASE_URL", "")      # adresse de l'API du modèle

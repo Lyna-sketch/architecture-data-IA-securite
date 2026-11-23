@@ -1,6 +1,6 @@
 # De la facture scannée à l'agent IA : rapport de projet
 
-**Auteurs :** [noms du groupe] · **Module :** Architecture, data et IA · **Date :** novembre 2026
+**Auteurs :** Slifi Lyna, Otmani Amina · **Module :** Architecture, data et IA · **Date :** 23 novembre 2026
 
 ## 1. Objectif et état d'avancement
 

@@ -10,10 +10,8 @@ Lancement :  uv run python etape1_recuperer.py
 from pathlib import Path
 
 import boto3
-from pypdf import PdfReader
-
-import boto3
 from botocore.config import Config
+from pypdf import PdfReader
 
 import config
 

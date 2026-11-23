@@ -1,0 +1,14 @@
+# Secrets : ne JAMAIS commiter le vrai fichier .env (seul .env.example est versionné)
+.env
+
+# Données téléchargées et produites par le pipeline (reproductibles via les commandes)
+data/
+
+# Environnement Python
+.venv/
+__pycache__/
+*.pyc
+
+# Fichiers de l'IDE
+.idea/
+*.iml

@@ -12,6 +12,9 @@ from pathlib import Path
 import boto3
 from pypdf import PdfReader
 
+import boto3
+from botocore.config import Config
+
 import config
 
 # Une page avec moins de 20 caractères lisibles est considérée comme une image (scan)
@@ -22,8 +25,10 @@ def telecharger_factures():
     """Télécharge les PDF du bucket qui ne sont pas encore dans data/landing/."""
     config.DOSSIER_LANDING.mkdir(parents=True, exist_ok=True)
 
-    # boto3 lit tout seul les clés AWS_... dans les variables d'environnement (.env)
-    s3 = boto3.client("s3")
+    # Hyperfluid expose une passerelle S3 : le nom du bucket doit rester dans le
+    # chemin (/factures/...), sinon boto3 fabrique factures.<endpoint>, que le
+    # certificat TLS ne couvre pas (SSLError).
+    s3 = boto3.client("s3", config=Config(s3={"addressing_style": "path"}))
 
     # Liste les objets du bucket (par paquets de 1000 maximum, d'où le « paginator »)
     pages = s3.get_paginator("list_objects_v2").paginate(Bucket=config.BUCKET)

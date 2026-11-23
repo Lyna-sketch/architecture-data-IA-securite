@@ -1,0 +1,21 @@
+# Liste des bibliothèques Python du projet.
+# `uv sync` crée l'environnement (.venv) et installe tout ce qui est listé ici.
+[project]
+name = "factures"
+version = "0.1.0"
+description = "De la facture scannée à l'agent IA : OCR, bronze/silver, DuckDB, MCP"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.35",          # accès au bucket S3
+    "python-dotenv>=1.0",   # lit le fichier .env (les secrets)
+    "pypdf>=5.0",           # lit le texte d'un PDF
+    "pypdfium2>=5.15.2",    # transforme une page PDF en image (pour l'OCR)
+    "pillow>=13.0.0",       # enregistre l'image en PNG
+    "requests>=2.32",       # appels HTTP à l'API du modèle d'OCR
+    "pandas>=3.1.1",        # tableaux de données (DataFrame)
+    "pyarrow>=26.0.1",      # lecture / écriture des fichiers Parquet
+    "duckdb>=2.0.1",        # moteur SQL (entrepôt) qui interroge directement les fichiers Parquet
+    "mcp>=2.3.0",            # serveur MCP (Model Context Protocol) pour exposer l'entrepôt à une IA
+    "openai>=3.57.0",          # client pour les API de LLM au format OpenAI (Hyperfluid, Ollama, OpenAI...)
+]

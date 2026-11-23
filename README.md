@@ -43,6 +43,21 @@ PDF (bucket S3) ─► extraction / OCR ─► bronze ─► silver ─► entre
 - Si l'OCR est indisponible, la ligne est enregistrée avec `statut = erreur` et le fichier est retraité au lancement suivant.
 - Colonnes : `sha256`, `nom_fichier`, `taille_octets`, `nb_pages`, `type_pdf`, `methode`, `modele_ocr`, `ocr_dpi`, `texte`, `duree_s`, `date_ingestion`, `statut`, `erreur`.
 
+| 4 | `uv run python etape4_silver.py` | transforme le bronze en tables propres et typées dans `data/silver/` |
+
+### La couche silver (`data/silver/`)
+
+| Fichier | Contenu |
+|---|---|
+| `factures.parquet` | une ligne par facture, avec `statut_qualite` (`valide` / `signalee`) et `anomalies` |
+| `lignes_facture.parquet` | une ligne par ligne de facture (désignation, quantité, prix, TVA, total) |
+| `quarantaine.parquet` | documents rejetés, avec leur `motif` |
+
+- Montants en `decimal(12,2)` (calcul exact au centime), dates en `date`.
+- **Rejetée** (quarantaine) : champ obligatoire manquant ou illisible, date invalide, doublon (même fournisseur + même numéro).
+- **Signalée** (gardée, à vérifier) : HT + TVA ≠ TTC, somme des lignes ≠ HT, quantité × prix ≠ total de ligne, échéance avant émission, SIRET invalide.
+- Le silver est recalculé entièrement à partir du bronze à chaque lancement.
+
 ## Fichiers
 
 | Fichier | Rôle |
@@ -51,3 +66,4 @@ PDF (bucket S3) ─► extraction / OCR ─► bronze ─► silver ─► entre
 | `etape1_recuperer.py` | étape 1 : téléchargement S3 + détection texte / image |
 | `etape2_ocr.py` | étape 2 : appel du modèle LightOnOCR-3 |
 | `etape3_bronze.py` | étape 3 : couche bronze (texte brut + traçabilité, incrémental) |
+| `etape4_silver.py` | étape 4 : couche silver (parsing, typage, contrôles qualité, quarantaine) |

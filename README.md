@@ -38,7 +38,8 @@ PDF (bucket S3) ─► extraction / OCR ─► bronze ─► silver ─► entre
 | 4 | `uv run python etape4_silver.py` | transforme le bronze en tables propres et typées dans `data/silver/` |
 | 5 | `uv run python etape5_evaluation.py` (option : liste de DPI, ex. `100 300`) | compare l'extraction OCR à la vérité terrain `verite_terrain.csv`, champ par champ, à 50 / 72 / 130 / 200 DPI |
 | 6 | `uv run python etape6_entrepot.py` | crée l'entrepôt DuckDB `data/entrepot.duckdb` (vues SQL sur le bronze et le silver) |
-| 7 | `uv run python test_etape7_mcp.py` | teste le serveur MCP `etape7_mcp.py` : chaque outil + tentatives d'attaque (28 tests) |
+| 7 | `uv run python test_etape7_mcp.py` | teste le serveur MCP `etape7_mcp.py` : chaque outil + tentatives d'attaque (29 tests) |
+| 8 | `uv run python etape8_agent.py` (option : `--llm ollama`, `-q "question"`) | agent conversationnel en français, qui interroge les factures via le serveur MCP |
 
 ### La couche bronze (`data/bronze/run_*.parquet`)
 
@@ -119,6 +120,25 @@ retard en 2025 ? »). `uv` doit être accessible dans le `PATH` de Claude Code.
     "args": ["run", "--directory", "/chemin/vers/architecture-data-IA-securite", "python", "etape7_mcp.py"] } } }
 ```
 
+### L'agent (`etape8_agent.py`)
+
+```bash
+uv run python etape8_agent.py                    # conversation avec le LLM par défaut (LLM_PROFIL)
+uv run python etape8_agent.py --llm ollama       # même agent, autre LLM
+uv run python etape8_agent.py -q "Quel est le montant TTC des factures en retard en 2025 ?"
+```
+
+- **LLM interchangeable par configuration** : chaque LLM est un *profil* `P` décrit dans `.env` par `P_BASE_URL`,
+  `P_API_KEY` et `P_MODEL` (toute API compatible OpenAI : Hyperfluid/vLLM, Ollama, OpenAI, Anthropic…).
+  Profils fournis dans `.env.example` : `gemma` (Gemma 4 12B sur Hyperfluid) et `ollama` (modèle local).
+- L'agent n'accède aux données **que** par les outils du serveur MCP, et affiche chaque outil appelé, ses
+  arguments, les requêtes SQL et un aperçu du résultat.
+- Il garde l'historique de la conversation ; `quitter`, Ctrl+D ou Ctrl+C l'arrêtent proprement.
+- Pour ne pas inventer de chiffres : la consigne lui interdit tout nombre qui ne vient pas d'un outil, et lui
+  demande de faire calculer les sommes par la base (`totaux_factures`).
+
+**LLM local avec Ollama** : installer Ollama (<https://ollama.com>), puis `ollama pull qwen2.5:7b`.
+
 ## Fichiers
 
 | Fichier | Rôle |
@@ -135,3 +155,4 @@ retard en 2025 ? »). `uv` doit être accessible dans le `PATH` de Claude Code.
 | `etape7_mcp.py` | étape 7 : serveur MCP (5 outils en lecture seule) |
 | `test_etape7_mcp.py` | étape 7 : tests de chaque outil et des protections |
 | `.mcp.json` | déclaration du serveur MCP pour Claude Code |
+| `etape8_agent.py` | étape 8 : agent IA (LLM interchangeable, affichage des outils et du SQL) |

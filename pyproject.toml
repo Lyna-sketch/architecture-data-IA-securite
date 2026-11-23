@@ -17,4 +17,5 @@ dependencies = [
     "pyarrow>=26.0.1",      # lecture / écriture des fichiers Parquet
     "duckdb>=2.0.1",        # moteur SQL (entrepôt) qui interroge directement les fichiers Parquet
     "mcp>=2.3.0",            # serveur MCP (Model Context Protocol) pour exposer l'entrepôt à une IA
+    "openai>=3.57.0",          # client pour les API de LLM au format OpenAI (Hyperfluid, Ollama, OpenAI...)
 ]

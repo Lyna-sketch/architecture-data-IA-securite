@@ -91,14 +91,15 @@ def construire_filtres(fournisseur, client, statut_paiement, statut_qualite, cat
     if client:
         conditions.append("client ILIKE ?")
         parametres.append(f"%{client}%")
+    # Les statuts et catégories ignorent la casse : un LLM écrit souvent « en retard » pour « En retard »
     if statut_paiement:
-        conditions.append("statut_paiement = ?")
+        conditions.append("lower(statut_paiement) = lower(?)")
         parametres.append(statut_paiement)
     if statut_qualite:
-        conditions.append("statut_qualite = ?")
+        conditions.append("lower(statut_qualite) = lower(?)")
         parametres.append(statut_qualite)
     if categorie:
-        conditions.append("categorie = ?")
+        conditions.append("lower(categorie) = lower(?)")
         parametres.append(categorie)
     if date_debut:
         conditions.append("date_emission >= ?")

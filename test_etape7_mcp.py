@@ -64,6 +64,9 @@ async def main():
                              "WHERE statut_paiement = 'En retard' AND year(date_emission) = 2025")[0]
         verifier(f"en retard en 2025 : {nb} factures, {ttc} € TTC",
                  r["totaux"][0]["nb_factures"] == nb and r["totaux"][0]["total_ttc"] == str(ttc), r["totaux"])
+        r2 = await appeler(client, "totaux_factures",
+                           {"statut_paiement": "en retard", "date_debut": "2025-01-01", "date_fin": "2025-12-31"})
+        verifier("statut écrit en minuscules : même résultat", r2["totaux"] == r["totaux"], r2["totaux"])
         r = await appeler(client, "totaux_factures", {"regrouper_par": "fournisseur"})
         total_groupes = sum(float(g["total_ttc"]) for g in r["totaux"])
         total_global = float(sql_direct("SELECT sum(total_ttc) FROM silver.factures")[0][0])

@@ -1,0 +1,21 @@
+source_fichier,numero_facture,fournisseur,siret_fournisseur,client,siret_client,date_emission,date_echeance,categorie,statut_paiement,mode_paiement,total_ht,total_tva,total_ttc,nb_lignes
+facture_A-2025-0010_scan.pdf,A-2025-0010,Aubry,77360260298050,Muller,44550229754599,2025-06-01,2025-06-16,Conseil,En retard,Carte bancaire,18496.20,3699.24,22195.44,1
+facture_A-2026-0004_scan.pdf,A-2026-0004,Aubry,77360260298050,Fleury,67468071585977,2026-03-23,2026-04-07,Conseil,En retard,Prélèvement SEPA,10911.61,2182.32,13093.93,2
+facture_BS-2025-0002_scan.pdf,BS-2025-0002,Bernard SARL,48740164859826,Diallo Barbe S.A.R.L.,29413186741232,2025-09-11,2025-10-26,Fournitures,Payée,Prélèvement SEPA,453.30,90.66,543.96,4
+facture_BS-2026-0001_scan.pdf,BS-2026-0001,Bernard SARL,48740164859826,Lombard,20037917087083,2026-06-30,2026-07-30,Fournitures,Payée,Prélèvement SEPA,235.35,47.07,282.42,2
+facture_BS-2026-0005_scan.pdf,BS-2026-0005,Bernard SARL,48740164859826,Fernandes Grondin S.A.R.L.,14345581466909,2026-04-25,2026-06-09,Fournitures,En retard,Virement bancaire,764.90,152.98,917.88,4
+facture_BS-2026-0007_scan.pdf,BS-2026-0007,Bernard SARL,48740164859826,Jacob Aubert S.A.S.,48467737249972,2026-11-18,2027-01-17,Fournitures,Payée,Virement bancaire,246.92,49.38,296.30,2
+facture_C-2025-0016_scan.pdf,C-2025-0016,Chevalier,49593103241928,Vidal,06990162764641,2025-09-20,2025-10-20,Maintenance,Payée,Prélèvement SEPA,504.12,100.82,604.94,1
+facture_C-2026-0004_scan.pdf,C-2026-0004,Chevalier,49593103241928,Grondin Pinto et Fils,22196937164743,2026-02-22,2026-04-08,Maintenance,Payée,Chèque,8178.77,1635.75,9814.52,3
+facture_C-2026-0007_scan.pdf,C-2026-0007,Chevalier,49593103241928,Mace S.A.,89517187457809,2026-05-19,2026-06-03,Maintenance,En attente,Prélèvement SEPA,2549.56,509.91,3059.47,3
+facture_C-2026-0014_scan.pdf,C-2026-0014,Chevalier,49593103241928,Diallo Barbe S.A.R.L.,29413186741232,2026-03-30,2026-05-29,Maintenance,En attente,Virement bancaire,3495.42,699.08,4194.50,2
+facture_LG-2025-0008_scan.pdf,LG-2025-0008,Le Gall,88095701482489,Muller,44550229754599,2025-09-14,2025-10-14,Informatique,Payée,Carte bancaire,6860.85,1372.17,8233.02,1
+facture_MS-2025-0006_scan.pdf,MS-2025-0006,Maury S.A.R.L.,10433218438637,Martineau,56159514199468,2025-09-08,2025-11-07,Informatique,En retard,Chèque,10630.54,2126.11,12756.65,5
+facture_MS-2025-0013_scan.pdf,MS-2025-0013,Maury S.A.R.L.,10433218438637,Denis,21024994259401,2025-11-02,2026-01-01,Informatique,Payée,Prélèvement SEPA,1896.06,379.21,2275.27,2
+facture_MS-2025-0017_scan.pdf,MS-2025-0017,Maury S.A.R.L.,10433218438637,Vidal,06990162764641,2025-01-16,2025-03-02,Informatique,En attente,Virement bancaire,200.81,40.16,240.97,2
+facture_MS-2026-0005_scan.pdf,MS-2026-0005,Maury S.A.R.L.,10433218438637,Pereira,45271111204945,2026-05-04,2026-06-03,Informatique,Payée,Virement bancaire,334.22,66.84,401.06,1
+facture_P-2025-0002_scan.pdf,P-2025-0002,Payet,98543534684251,Mace S.A.,89517187457809,2025-06-28,2025-08-12,Informatique,En retard,Chèque,15897.98,3179.60,19077.58,4
+facture_V-2025-0001_scan.pdf,V-2025-0001,Vasseur,38849696066978,Lecomte,99650752136783,2025-12-11,2025-12-26,Fournitures,Payée,Carte bancaire,148.26,29.65,99999.99,1
+facture_V-2025-0007_scan.pdf,V-2025-0007,Vasseur,38849696066978,Chauvin,91241904151850,2025-06-29,2025-07-14,Fournitures,En retard,Prélèvement SEPA,633.90,126.78,760.68,4
+facture_V-2025-0009_scan.pdf,V-2025-0009,Vasseur,38849696066978,Torres,08470076424998,2025-03-03,2025-04-17,Fournitures,En attente,Virement bancaire,660.90,132.18,793.08,1
+facture_V-2026-0010_scan.pdf,V-2026-0010,Vasseur,38849696066978,Jacob Aubert S.A.S.,48467737249972,2026-01-17,2026-03-03,Fournitures,En retard,Prélèvement SEPA,285.38,57.08,342.46,4

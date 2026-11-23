@@ -69,7 +69,12 @@ def appeler_ocr(image_png):
         timeout=120,
     )
     reponse.raise_for_status()  # lève une erreur si le serveur répond 4xx / 5xx
-    return reponse.json()["choices"][0]["message"]["content"]
+    texte = reponse.json()["choices"][0]["message"]["content"]
+
+    # Une réponse vide n'est pas un résultat : c'est une erreur (le document sera retraité)
+    if not texte or not texte.strip():
+        raise ValueError("réponse vide du modèle d'OCR")
+    return texte
 
 
 if __name__ == "__main__":

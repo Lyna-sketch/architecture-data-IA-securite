@@ -36,6 +36,7 @@ PDF (bucket S3) ─► extraction / OCR ─► bronze ─► silver ─► entre
 | 2 | `uv run python etape2_ocr.py facture_P-2025-0002_scan.pdf` (option : `200` pour 200 DPI) | envoie la page au modèle d'OCR, affiche le texte reconnu et le temps de traitement |
 | 3 | `uv run python etape3_bronze.py` (option : `5` pour limiter à 5 fichiers) | extrait le texte de chaque nouveau PDF (pypdf ou OCR) et l'ajoute à la couche bronze `data/bronze/` |
 | 4 | `uv run python etape4_silver.py` | transforme le bronze en tables propres et typées dans `data/silver/` |
+| 5 | `uv run python etape5_evaluation.py` (option : liste de DPI, ex. `100 300`) | compare l'extraction OCR à la vérité terrain `verite_terrain.csv`, champ par champ, à 50 / 72 / 130 / 200 DPI |
 
 ### La couche bronze (`data/bronze/run_*.parquet`)
 
@@ -66,3 +67,6 @@ PDF (bucket S3) ─► extraction / OCR ─► bronze ─► silver ─► entre
 | `etape2_ocr.py` | étape 2 : appel du modèle LightOnOCR-3 |
 | `etape3_bronze.py` | étape 3 : couche bronze (texte brut + traçabilité, incrémental) |
 | `etape4_silver.py` | étape 4 : couche silver (parsing, typage, contrôles qualité, quarantaine) |
+| `etape5_verite_terrain.py` | étape 5 : prépare le brouillon de vérité terrain (20 scans tirés au hasard) |
+| `verite_terrain.csv` | vérité terrain vérifiée à la main sur les images (20 factures × 14 champs) |
+| `etape5_evaluation.py` | étape 5 : précision de l'OCR champ par champ, pour plusieurs résolutions |

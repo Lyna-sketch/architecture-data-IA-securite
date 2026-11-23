@@ -22,11 +22,11 @@ PDF (S3) ──► extraction / OCR ──► bronze ──► silver ──► 
 | 4 | Couche silver (typée, contrôlée) | Réalisée |
 | 5 | Mesure de la qualité de l'OCR | Réalisée |
 | 6 | Entrepôt de données SQL (DuckDB) | Réalisée |
-| 7 | Serveur MCP | **En cours** |
-| 8 | Agent IA | **À venir** |
+| 7 | Serveur MCP | Réalisée |
+| 8 | Agent IA | **En cours** |
 | 9 | Industrialisation | Proposition rédigée (section 9) |
  
-Nous avons avancé étape par étape, en validant chacune avant de passer à la suivante. Les étapes 1 à 6 sont réalisées et testées ; les étapes 7 et 8 sont en cours (section 8).
+Nous avons avancé étape par étape, en validant chacune avant de passer à la suivante. Les étapes 1 à 7 sont réalisées et testées ; l'étape 8 est en cours (section 8).
  
 ---
  
@@ -247,7 +247,43 @@ Les vues contiennent le chemin complet des fichiers Parquet sur la machine où e
  
 ### 8.2 Étape 7 : le serveur MCP
  
-[À venir]
+Le script `etape7_mcp.py` est un serveur MCP écrit avec le SDK Python officiel (`mcp`, classe `MCPServer`). Il donne à une IA un accès **en lecture seule** à l'entrepôt, par cinq outils :
+ 
+| Outil | Rôle |
+|---|---|
+| `lister_factures` | liste des factures, filtres : fournisseur, client, statut de paiement, statut qualité, catégorie, période |
+| `totaux_factures` | nombre et totaux HT / TVA / TTC avec les mêmes filtres, regroupement facultatif (par fournisseur, mois…) |
+| `detail_facture` | une facture et toutes ses lignes |
+| `schema_donnees` | tables, colonnes, types et valeurs possibles des statuts |
+| `requete_sql` | une requête SQL libre, limitée à un seul `SELECT` |
+ 
+Chaque réponse contient la clé `sql`, avec les requêtes réellement exécutées et leurs paramètres. Les montants sont renvoyés en texte exact (`"19077.58"`) et non en nombre flottant.
+ 
+**Tests.** Le script `test_etape7_mcp.py` lance le serveur comme un vrai client MCP (processus séparé), appelle chaque outil et compare ses réponses à une requête SQL faite directement sur l'entrepôt. Résultat : **28 tests sur 28 réussis**. Exemple : « factures en retard en 2025 » donne 12 factures et 106 886,43 € TTC, comme à l'étape 6.
+ 
+**Sécurité : quatre protections successives**, testées par neuf tentatives d'attaque, toutes refusées :
+ 
+| Protection | Ce qu'elle bloque |
+|---|---|
+| Filtres passés en paramètres (`?`), jamais collés dans le SQL | l'injection SQL : le filtre `x' OR 1=1 --` renvoie 0 facture au lieu de toutes |
+| `requete_sql` vérifie qu'il y a une seule instruction et qu'elle est de type `SELECT` | `DELETE`, `DROP`, `INSERT`, `CREATE`, `COPY`, `ATTACH`, et `SELECT 1; DROP …` |
+| Entrepôt ouvert en lecture seule | toute écriture dans la base, même si un contrôle était contourné |
+| DuckDB limité aux dossiers `data/bronze` et `data/silver`, configuration verrouillée | la lecture de `.env` (`SELECT * FROM read_text('.env')`, qui est pourtant un `SELECT`) et l'écriture de fichiers |
+ 
+La dernière protection est essentielle : sans elle, une IA pouvait lire nos clés d'API avec une simple requête `SELECT`, que le contrôle sur le type d'instruction laisse passer.
+ 
+**Branchement sur un client MCP.** Le fichier `.mcp.json` du projet déclare le serveur pour Claude Code. [À compléter : capture d'une conversation dans Claude Code qui utilise le serveur, par exemple « Quel est le montant TTC des factures en retard en 2025 ? », en montrant les outils appelés.]
+ 
+#### Questions de l'énoncé
+ 
+**Comment rédiger le nom et la description des outils pour que le LLM fasse le bon choix ?**
+Chaque nom dit ce que fait l'outil (`totaux_factures`, `detail_facture`). Chaque description précise quand l'utiliser (« pour toute question “combien”, “total”, “montant” », « à appeler avant d'écrire une requête »), liste les valeurs possibles des filtres (« Payée », « En retard », « En attente ») et le format attendu (dates `AAAA-MM-JJ`, numéro `P-2025-0002`). Le serveur indique aussi au LLM de faire calculer les sommes par la base plutôt que de les faire lui-même.
+ 
+**Comment éviter les injections SQL ?**
+Pour les outils à filtres, les valeurs sont toujours passées en paramètres : la base les traite comme des données, jamais comme du code. Seuls des morceaux de SQL tirés d'une liste blanche (les regroupements autorisés) sont insérés dans la requête. Pour l'outil SQL libre, on ne peut pas paramétrer, d'où les trois autres protections (une seule instruction `SELECT`, lecture seule, accès aux fichiers limité).
+ 
+**Que doit renvoyer un outil en cas d'erreur pour que le LLM puisse se corriger ?**
+Un message explicite, sans faire planter le serveur, avec la requête concernée et un conseil. Par exemple : `{"erreur": "Date invalide.", "conseil": "Utiliser le format AAAA-MM-JJ, par exemple 2025-01-31."}`, ou, pour un regroupement inconnu, la liste des valeurs possibles. Le LLM peut alors relancer l'outil avec un argument corrigé.
  
 ### 8.3 Étape 8 : l'agent
  
@@ -301,7 +337,7 @@ L'idempotence, la reprise sur erreur, la traçabilité du bronze et la mesure de
 - **Des problèmes techniques d'ordinateur**, qui nous ont fait perdre du temps de développement et de test. [À préciser : panne, changement de poste, environnement à réinstaller.]
 ### Limites actuelles
  
-- **Le système est incomplet.** Les données sont interrogeables en SQL (entrepôt DuckDB, section 8.1), mais il n'y a pas encore de serveur MCP ni d'agent : l'objectif final, poser une question en langage naturel, n'est pas atteint.
+- **Le système est incomplet.** Les données sont interrogeables en SQL (entrepôt DuckDB, section 8.1) et par une IA via le serveur MCP (section 8.2), mais notre propre agent n'est pas encore réalisé.
 - **La vérité terrain est petite et peu indépendante.** Elle porte sur 20 factures (280 valeurs) et a été pré-remplie avec les valeurs extraites, puis vérifiée à la main. Ce procédé gagne du temps mais expose à un biais de confirmation. Avec 20 valeurs par champ, une seule erreur pèse 5 %.
 - **Nos résultats sont probablement trop optimistes.** Nous obtenons 100 % de précision dès 72 DPI, mais nos scans sont propres. Des scans flous, penchés ou tachés donneraient sans doute de moins bons résultats, et notre échantillon ne permet pas de mesurer un taux d'erreur rare.
 - **Le parseur est adapté à un format de facture précis.** Il fonctionne sur ces 100 factures, qui ont toutes la même structure. Un fournisseur avec une mise en page différente le mettrait en difficulté.
@@ -309,8 +345,7 @@ L'idempotence, la reprise sur erreur, la traçabilité du bronze et la mesure de
 - **Le stockage est local.** Le bronze et le silver sont des fichiers sur disque, sans sauvegarde. L'accès concurrent repose sur une règle (ouvrir l'entrepôt en lecture seule) : un utilisateur qui ouvrirait DuckDB en lecture-écriture bloquerait les autres programmes.
 ### Pistes d'amélioration
  
-1. **Terminer les étapes 7 et 8**, dans cet ordre, car l'agent dépend du serveur MCP :
-   - un serveur MCP en lecture seule, avec des descriptions d'outils soignées et des requêtes paramétrées contre l'injection SQL, qui renvoie les requêtes réellement exécutées ;
+1. **Terminer l'étape 8** :
    - un agent dont le LLM se change par configuration, avec affichage des outils appelés et des requêtes SQL pour vérifier ses chiffres.
 2. **Renforcer l'évaluation** : une vérité terrain plus large, saisie indépendamment de l'extraction, avec des scans volontairement dégradés (flou, rotation, bruit) pour mesurer la robustesse réelle de l'OCR.
 3. **Rendre le parseur plus robuste** en le testant sur des mises en page variées, avec des tests unitaires pour chaque format.

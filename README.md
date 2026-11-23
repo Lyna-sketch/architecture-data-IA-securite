@@ -38,6 +38,7 @@ PDF (bucket S3) ─► extraction / OCR ─► bronze ─► silver ─► entre
 | 4 | `uv run python etape4_silver.py` | transforme le bronze en tables propres et typées dans `data/silver/` |
 | 5 | `uv run python etape5_evaluation.py` (option : liste de DPI, ex. `100 300`) | compare l'extraction OCR à la vérité terrain `verite_terrain.csv`, champ par champ, à 50 / 72 / 130 / 200 DPI |
 | 6 | `uv run python etape6_entrepot.py` | crée l'entrepôt DuckDB `data/entrepot.duckdb` (vues SQL sur le bronze et le silver) |
+| 7 | `uv run python test_etape7_mcp.py` | teste le serveur MCP `etape7_mcp.py` : chaque outil + tentatives d'attaque (28 tests) |
 
 ### La couche bronze (`data/bronze/run_*.parquet`)
 
@@ -91,6 +92,33 @@ Depuis **DBeaver** :
 3. Onglet *Général* (ou *Paramètres de connexion*) : cocher **Lecture seule** (*Read-only connection*).
 4. *Terminer*, puis ouvrir un éditeur SQL : `SELECT * FROM silver.factures;`
 
+### Le serveur MCP (`etape7_mcp.py`)
+
+| Outil | Rôle |
+|---|---|
+| `lister_factures` | liste des factures, filtres : fournisseur, client, statut de paiement, statut qualité, catégorie, période |
+| `totaux_factures` | nombre et totaux HT / TVA / TTC avec les mêmes filtres, regroupement facultatif |
+| `detail_facture` | une facture et ses lignes |
+| `schema_donnees` | tables, colonnes, types et valeurs possibles des statuts |
+| `requete_sql` | une requête `SELECT` libre (lecture seule) |
+
+Chaque réponse contient `sql` : les requêtes réellement exécutées.
+
+**Sécurité** : filtres passés en paramètres (`?`), une seule requête `SELECT` acceptée par `requete_sql`,
+entrepôt ouvert en lecture seule, DuckDB limité aux dossiers `data/bronze` et `data/silver` (impossible de lire
+`.env` ou d'écrire un fichier), configuration verrouillée.
+
+**Utilisation avec Claude Code** : le fichier `.mcp.json` du projet déclare le serveur. Ouvrir une session Claude Code
+dans ce dossier, accepter le serveur `factures`, puis poser une question (« Quel est le montant TTC des factures en
+retard en 2025 ? »). `uv` doit être accessible dans le `PATH` de Claude Code.
+
+**Utilisation avec Claude Desktop** : ajouter dans `claude_desktop_config.json` :
+
+```json
+{ "mcpServers": { "factures": { "command": "/chemin/vers/uv",
+    "args": ["run", "--directory", "/chemin/vers/architecture-data-IA-securite", "python", "etape7_mcp.py"] } } }
+```
+
 ## Fichiers
 
 | Fichier | Rôle |
@@ -104,3 +132,6 @@ Depuis **DBeaver** :
 | `verite_terrain.csv` | vérité terrain vérifiée à la main sur les images (20 factures × 14 champs) |
 | `etape5_evaluation.py` | étape 5 : précision de l'OCR champ par champ, pour plusieurs résolutions |
 | `etape6_entrepot.py` | étape 6 : entrepôt DuckDB (vues SQL) + `ouvrir_entrepot()` en lecture seule |
+| `etape7_mcp.py` | étape 7 : serveur MCP (5 outils en lecture seule) |
+| `test_etape7_mcp.py` | étape 7 : tests de chaque outil et des protections |
+| `.mcp.json` | déclaration du serveur MCP pour Claude Code |

@@ -8,37 +8,37 @@ PDF (bucket S3) ─► extraction / OCR ─► bronze ─► silver ─► entre
 
 ## Installation
 
-1. Installer [uv](https://docs.astral.sh/uv/) (gestionnaire Python : installe Python et les dépendances) :
+1. Installer [uv](https://docs.astral.sh/uv/) (installe Python et les bibliothèques du projet) :
 
    ```bash
    curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-2. Installer les dépendances du projet :
+   Puis ouvrir un nouveau terminal (ou `source ~/.local/bin/env`).
+
+2. Installer les bibliothèques :
 
    ```bash
    uv sync
    ```
 
-3. Créer le fichier de configuration et y coller vos clés (ce fichier n'est jamais commité) :
+3. Créer le fichier `.env` et y coller vos clés (il n'est jamais commité) :
 
    ```bash
    cp .env.example .env
    ```
 
-## Utilisation
+## Lancer chaque étape
 
-| Commande | Rôle |
+| Étape | Commande | Ce qu'elle fait |
+|---|---|---|
+| 1 | `uv run python etape1_recuperer.py` | télécharge les nouvelles factures dans `data/landing/` et classe chaque PDF en « texte » ou « image » |
+| 2 | `uv run python etape2_ocr.py facture_P-2025-0002_scan.pdf` (option : `200` pour 200 DPI) | envoie la page au modèle d'OCR, affiche le texte reconnu et le temps de traitement |
+
+## Fichiers
+
+| Fichier | Rôle |
 |---|---|
-| `uv run factures fetch` | télécharge les nouvelles factures du bucket vers `data/landing/` |
-| `uv run factures classify` | indique pour chaque PDF s'il est « texte » ou « image » (scan) |
-
-## Organisation du code
-
-```
-src/factures/
-  config.py     configuration (lue depuis .env)
-  fetch.py      téléchargement S3 incrémental
-  detection.py  détection texte / image
-  cli.py        commandes `factures ...`
-```
+| `config.py` | configuration commune (lit `.env`) |
+| `etape1_recuperer.py` | étape 1 : téléchargement S3 + détection texte / image |
+| `etape2_ocr.py` | étape 2 : appel du modèle LightOnOCR-3 |

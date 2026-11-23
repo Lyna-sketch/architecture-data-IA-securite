@@ -1,5 +1,5 @@
-# Description du projet Python : nom, version de Python, dépendances.
-# `uv sync` lit ce fichier, crée l'environnement virtuel (.venv) et installe tout.
+# Liste des bibliothèques Python du projet.
+# `uv sync` crée l'environnement (.venv) et installe tout ce qui est listé ici.
 [project]
 name = "factures"
 version = "0.1.0"
@@ -7,18 +7,10 @@ description = "De la facture scannée à l'agent IA : OCR, bronze/silver, DuckDB
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "boto3>=1.35",          # client S3 (fonctionne avec tout stockage compatible S3, dont Hyperfluid)
-    "python-dotenv>=1.0",   # charge le fichier .env dans les variables d'environnement
-    "pypdf>=5.0",           # lecture des PDF : extraction de la couche texte
+    "boto3>=1.35",          # accès au bucket S3
+    "python-dotenv>=1.0",   # lit le fichier .env (les secrets)
+    "pypdf>=5.0",           # lit le texte d'un PDF
+    "pypdfium2>=5.15.2",    # transforme une page PDF en image (pour l'OCR)
+    "pillow>=13.0.0",       # enregistre l'image en PNG
+    "requests>=2.32",       # appels HTTP à l'API du modèle d'OCR
 ]
-
-# Crée la commande `factures` (utilisable via `uv run factures ...`)
-[project.scripts]
-factures = "factures.cli:main"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/factures"]

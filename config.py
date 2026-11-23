@@ -24,6 +24,7 @@ DOSSIER_LANDING = DOSSIER_PROJET / "data" / "landing"   # PDF téléchargés dep
 DOSSIER_BRONZE = DOSSIER_PROJET / "data" / "bronze"     # texte brut extrait + métadonnées (Parquet)
 DOSSIER_SILVER = DOSSIER_PROJET / "data" / "silver"     # tables propres et typées (Parquet)
 DOSSIER_EVALUATION = DOSSIER_PROJET / "data" / "evaluation"  # textes OCR et résultats de l'étape 5
+FICHIER_ENTREPOT = DOSSIER_PROJET / "data" / "entrepot.duckdb"  # entrepôt DuckDB (vues uniquement)
 
 # --- OCR ---
 OCR_URL = os.getenv("OCR_BASE_URL", "")      # adresse de l'API du modèle

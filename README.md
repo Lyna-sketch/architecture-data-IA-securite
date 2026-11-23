@@ -37,6 +37,7 @@ PDF (bucket S3) ─► extraction / OCR ─► bronze ─► silver ─► entre
 | 3 | `uv run python etape3_bronze.py` (option : `5` pour limiter à 5 fichiers) | extrait le texte de chaque nouveau PDF (pypdf ou OCR) et l'ajoute à la couche bronze `data/bronze/` |
 | 4 | `uv run python etape4_silver.py` | transforme le bronze en tables propres et typées dans `data/silver/` |
 | 5 | `uv run python etape5_evaluation.py` (option : liste de DPI, ex. `100 300`) | compare l'extraction OCR à la vérité terrain `verite_terrain.csv`, champ par champ, à 50 / 72 / 130 / 200 DPI |
+| 6 | `uv run python etape6_entrepot.py` | crée l'entrepôt DuckDB `data/entrepot.duckdb` (vues SQL sur le bronze et le silver) |
 
 ### La couche bronze (`data/bronze/run_*.parquet`)
 
@@ -58,6 +59,38 @@ PDF (bucket S3) ─► extraction / OCR ─► bronze ─► silver ─► entre
 - **Signalée** (gardée, à vérifier) : HT + TVA ≠ TTC, somme des lignes ≠ HT, quantité × prix ≠ total de ligne, échéance avant émission, SIRET invalide.
 - Le silver est recalculé entièrement à partir du bronze à chaque lancement.
 
+### L'entrepôt (`data/entrepot.duckdb`)
+
+Le fichier ne contient **que des vues** : les données restent dans les fichiers Parquet (un seul exemplaire).
+
+| Vue | Fichiers lus |
+|---|---|
+| `bronze.documents` | `data/bronze/run_*.parquet` |
+| `silver.factures` | `data/silver/factures.parquet` |
+| `silver.lignes_facture` | `data/silver/lignes_facture.parquet` |
+| `silver.quarantaine` | `data/silver/quarantaine.parquet` |
+
+- Les vues contiennent le chemin des fichiers **sur votre machine** : le fichier n'est pas versionné, chacun le
+  crée avec `uv run python etape6_entrepot.py` (à refaire seulement si le projet change de dossier).
+- Les vues sont toujours à jour : inutile de recréer l'entrepôt quand le bronze ou le silver changent.
+- **Toujours ouvrir l'entrepôt en lecture seule** : plusieurs lecteurs peuvent travailler en même temps, mais
+  une seule connexion en lecture-écriture bloque tous les autres programmes.
+
+Depuis Python :
+
+```python
+from etape6_entrepot import ouvrir_entrepot   # connexion en lecture seule
+con = ouvrir_entrepot()
+con.execute("SELECT sum(total_ttc) FROM silver.factures WHERE statut_paiement = 'En retard'").fetchall()
+```
+
+Depuis **DBeaver** :
+
+1. *Nouvelle connexion* → **DuckDB** (DBeaver propose de télécharger le pilote la première fois).
+2. *Path* : le chemin complet de `data/entrepot.duckdb`.
+3. Onglet *Général* (ou *Paramètres de connexion*) : cocher **Lecture seule** (*Read-only connection*).
+4. *Terminer*, puis ouvrir un éditeur SQL : `SELECT * FROM silver.factures;`
+
 ## Fichiers
 
 | Fichier | Rôle |
@@ -70,3 +103,4 @@ PDF (bucket S3) ─► extraction / OCR ─► bronze ─► silver ─► entre
 | `etape5_verite_terrain.py` | étape 5 : prépare le brouillon de vérité terrain (20 scans tirés au hasard) |
 | `verite_terrain.csv` | vérité terrain vérifiée à la main sur les images (20 factures × 14 champs) |
 | `etape5_evaluation.py` | étape 5 : précision de l'OCR champ par champ, pour plusieurs résolutions |
+| `etape6_entrepot.py` | étape 6 : entrepôt DuckDB (vues SQL) + `ouvrir_entrepot()` en lecture seule |

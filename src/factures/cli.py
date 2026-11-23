@@ -24,13 +24,21 @@ def cmd_classify(_args) -> None:
         print("Aucun PDF dans data/landing/ : lancez d'abord `uv run factures fetch`.")
         return
 
-    counts = {"texte": 0, "image": 0}
+    counts = {"texte": 0, "image": 0, "erreur": 0}
     print(f"{'fichier':40} {'type':6}  caractères par page")
     for pdf in pdfs:
-        kind = detect_type(pdf)
-        counts[kind] = counts.get(kind, 0) + 1
-        print(f"{pdf.name:40} {kind:6}  {page_text_lengths(pdf)}")
-    print(f"\nTotal : {len(pdfs)} PDF — {counts['texte']} texte, {counts['image']} image")
+        # Un PDF corrompu ne doit pas arrêter tout le traitement : on le signale et on continue.
+        try:
+            kind = detect_type(pdf)
+            detail = page_text_lengths(pdf)
+        except Exception as exc:
+            kind, detail = "erreur", exc
+        counts[kind] += 1
+        print(f"{pdf.name:40} {kind:6}  {detail}")
+    print(
+        f"\nTotal : {len(pdfs)} PDF — {counts['texte']} texte, "
+        f"{counts['image']} image, {counts['erreur']} erreur"
+    )
 
 
 def main() -> None:
